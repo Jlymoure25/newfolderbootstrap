@@ -1,1 +1,14 @@
-{ "name": "new-folder-bootstrap", "version": "1.0.0", "description": "A Bootstrap-based web project for showcasing and registering community events.", "scripts": { "start": "serve -s .", "public": "npm run build" }, "dependencies": { "serve": "^14.0.1" }, "author": "Jlymoure25", "license": "MIT" }
+{
+  "name": "new-folder-bootstrap",
+  "version": "1.0.0",
+  "description": "A Bootstrap-based web project for showcasing and registering community events.",
+  "scripts": {
+    "start": "serve -s public",
+    "build": "echo 'No build step needed - static site' && exit 0"
+  },
+  "dependencies": {
+    "serve": "^14.0.1"
+  },
+  "author": "Jlymoure25",
+  "license": "MIT"
+}
