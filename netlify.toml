@@ -1,0 +1,10 @@
+[build]
+  # Directory that contains the deploy-ready HTML, CSS, JS files
+  publish = "public"
+  # Command to run before deploying (if needed)
+  command = "npm run build"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
