@@ -73,15 +73,15 @@
 </div>
      <!-- Video section placed after the circular logo -->
 <div class="container-fluid p-0 mb-5" style="position: relative; height: auto; min-height: 400px;">
-    <video autoplay loop controls playsinline class="w-100" style="height: auto; object-fit: contain; display: block;" onloadstart="this.volume=0.7">
+    <video id="scrollVideo" loop controls playsinline class="w-100" style="height: auto; object-fit: contain; display: block;" onloadstart="this.volume=0.7">
         <!-- Secondary homepage video: now uses Untitled video3.mp4 with audio -->
         <source src="Untitled video3.mp4" type="video/mp4">
         <!-- Add a fallback message for browsers that do not support the video tag -->
         Your browser does not support the video tag.
     </video>
-    <!-- Note: Some browsers may block autoplay with sound until user interacts with the page -->
+    <!-- Note: Video will play with audio when scrolled into view -->
     <div class="text-center mt-2">
-        <small class="text-muted">💡 If audio doesn't play automatically, click the play button or anywhere on the page first</small>
+        <small class="text-muted">🎬 Video and audio will start when you scroll to it</small>
     </div>
 </div>
 
@@ -210,39 +210,52 @@
             });
         })();
 
-        // Enhanced video autoplay with audio handling
+        // Scroll-triggered video playback with audio
         document.addEventListener('DOMContentLoaded', function() {
-            const videos = document.querySelectorAll('video[src*="Untitled video3.mp4"], video source[src*="Untitled video3.mp4"]');
+            const scrollVideo = document.getElementById('scrollVideo');
             
-            videos.forEach(video => {
-                const videoElement = video.tagName === 'SOURCE' ? video.parentElement : video;
-                
-                // Try to play with sound immediately
-                const playPromise = videoElement.play();
-                
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.log('Autoplay with sound blocked, will enable after user interaction');
+            if (!scrollVideo) return;
+            
+            // Set up the video properties
+            scrollVideo.volume = 0.7;
+            scrollVideo.muted = false;
+            
+            // Create intersection observer to detect when video comes into view
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Video is in view, start playing with audio
+                        const playPromise = scrollVideo.play();
                         
-                        // Add one-time click listener to enable audio
-                        const enableAudio = () => {
-                            videoElement.muted = false;
-                            videoElement.volume = 0.7;
-                            videoElement.play();
-                            document.removeEventListener('click', enableAudio);
-                            document.removeEventListener('touchstart', enableAudio);
-                        };
-                        
-                        document.addEventListener('click', enableAudio, { once: true });
-                        document.addEventListener('touchstart', enableAudio, { once: true });
-                    });
-                }
-                
-                // Set volume when video is ready
-                videoElement.addEventListener('loadeddata', () => {
-                    videoElement.volume = 0.7;
+                        if (playPromise !== undefined) {
+                            playPromise.catch(error => {
+                                console.log('Autoplay blocked, trying muted first');
+                                // If audio autoplay fails, try muted first
+                                scrollVideo.muted = true;
+                                scrollVideo.play().then(() => {
+                                    // Add click listener to unmute
+                                    const unmute = () => {
+                                        scrollVideo.muted = false;
+                                        scrollVideo.volume = 0.7;
+                                        document.removeEventListener('click', unmute);
+                                        document.removeEventListener('touchstart', unmute);
+                                    };
+                                    document.addEventListener('click', unmute, { once: true });
+                                    document.addEventListener('touchstart', unmute, { once: true });
+                                });
+                            });
+                        }
+                    } else {
+                        // Video is out of view, pause it
+                        scrollVideo.pause();
+                    }
                 });
+            }, {
+                threshold: 0.5 // Video starts playing when 50% visible
             });
+            
+            // Start observing the video
+            observer.observe(scrollVideo);
         });
     </script>
 </body>
